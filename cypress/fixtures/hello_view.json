@@ -42,8 +42,8 @@
   ],
   "plugins": [
     {
-      "name": "Template",
-      "url": "http://localhost:9000/dist/jbrowse-plugin-template.umd.development.js"
+      "name": "BookmarksPlus",
+      "url": "http://localhost:9000/dist/jbrowse-plugin-bookmarks-plus.umd.development.js"
     }
   ],
   "defaultSession": {

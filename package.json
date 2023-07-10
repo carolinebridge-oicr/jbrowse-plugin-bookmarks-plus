@@ -1,6 +1,6 @@
 {
   "version": "0.0.1",
-  "name": "jbrowse-plugin-template",
+  "name": "jbrowse-plugin-bookmarks-plus",
   "keywords": [
     "jbrowse",
     "jbrowse2"
@@ -19,7 +19,7 @@
     },
     "jbrowse": {
       "plugin": {
-        "name": "Template"
+        "name": "BookmarksPlus"
       }
     }
   },
@@ -48,7 +48,7 @@
     "postversion": "git push --follow-tags"
   },
   "jbrowse-plugin": {
-    "name": "Template"
+    "name": "BookmarksPlus"
   },
   "prettier": {
     "semi": false,
@@ -69,6 +69,7 @@
     "@jbrowse/cli": "^2.6.1",
     "@jbrowse/core": "^2.6.1",
     "@jbrowse/development-tools": "^2.1.1",
+    "@jbrowse/plugin-linear-genome-view": "^2.6.1",
     "@mui/material": "^5.10.5",
     "@mui/system": "^5.10.5",
     "@mui/x-data-grid": "^5.17.3",
@@ -115,5 +116,9 @@
     "tss-react": "^3.0.0",
     "typescript": "^4.1.3"
   },
-  "private": true
+  "private": true,
+  "description": "A JBrowse 2 plugin that offers additional and enhanced functionality for using bookmarks",
+  "repository": "git@github.com:carolinebridge-oicr/jbrowse-plugin-bookmarks-plus.git",
+  "author": "Caroline Bridge <cbridge@oicr.on.ca>",
+  "license": "MIT"
 }

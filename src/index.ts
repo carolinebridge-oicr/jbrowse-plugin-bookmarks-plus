@@ -1,35 +1,86 @@
 import Plugin from '@jbrowse/core/Plugin'
 import PluginManager from '@jbrowse/core/PluginManager'
 import ViewType from '@jbrowse/core/pluggableElementTypes/ViewType'
-import { AbstractSessionModel, isAbstractMenuManager } from '@jbrowse/core/util'
-import { version } from '../package.json'
-import {
-  ReactComponent as HelloViewReactComponent,
-  stateModel as helloViewStateModel,
-} from './HelloView'
+import { PluggableElementType } from '@jbrowse/core/pluggableElementTypes'
+import { getSession, isSessionModelWithWidgets } from '@jbrowse/core/util'
+import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
-export default class TemplatePlugin extends Plugin {
-  name = 'TemplatePlugin'
+// Locals
+import { version } from '../package.json'
+
+export default class BookmarksPlusPlugin extends Plugin {
+  name = 'BookmarksPlusPlugin'
   version = version
 
   install(pluginManager: PluginManager) {
-    pluginManager.addViewType(() => {
-      return new ViewType({
-        name: 'HelloView',
-        stateModel: helloViewStateModel,
-        ReactComponent: HelloViewReactComponent,
-      })
-    })
+    pluginManager.addToExtensionPoint(
+      'Core-extendPluggableElement',
+      (pluggableElement: PluggableElementType) => {
+        if (pluggableElement.name === 'LinearGenomeView') {
+          const { stateModel } = pluggableElement as ViewType
+          const newStateModel = stateModel.extend(
+            (self: LinearGenomeViewModel) => {
+              return {
+                actions: {
+                  afterCreate() {
+                    document.addEventListener('keydown', (e) => {
+                      // ctrl+d or cmd+d
+                      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyD') {
+                        e.preventDefault()
+                        this.bookmarkVisibleRegion()
+                      }
+                      // ctrl+n or cmd+n
+                      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyM') {
+                        e.preventDefault()
+                        this.navigateNewestBookmark()
+                      }
+                    })
+                  },
+                  bookmarkVisibleRegion() {
+                    const selectedRegions = self.getSelectedRegions(
+                      self.leftOffset,
+                      self.rightOffset,
+                    )
+                    const firstRegion = selectedRegions[0]
+                    const session = getSession(self)
+                    if (isSessionModelWithWidgets(session)) {
+                      const { widgets } = session
+                      let bookmarkWidget = widgets.get('GridBookmark')
+                      if (!bookmarkWidget) {
+                        // @ts-ignore
+                        self.activateBookmarkWidget()
+                        bookmarkWidget = widgets.get('GridBookmark')
+                      }
+                      // @ts-expect-error
+                      bookmarkWidget.addBookmark(firstRegion)
+                    }
+                  },
+                  navigateNewestBookmark() {
+                    const session = getSession(self)
+                    if (isSessionModelWithWidgets(session)) {
+                      const { widgets } = session
+                      let bookmarkWidget = widgets.get('GridBookmark')
+                      if (!bookmarkWidget) {
+                        // @ts-ignore
+                        self.activateBookmarkWidget()
+                        bookmarkWidget = widgets.get('GridBookmark')
+                      }
+                      // @ts-expect-error
+                      self.navTo(bookmarkWidget.bookmarkedRegions[0])
+                    }
+                  },
+                },
+                views: {},
+              }
+            },
+          )
+
+          ;(pluggableElement as ViewType).stateModel = newStateModel
+        }
+        return pluggableElement
+      },
+    )
   }
 
-  configure(pluginManager: PluginManager) {
-    if (isAbstractMenuManager(pluginManager.rootModel)) {
-      pluginManager.rootModel.appendToMenu('Add', {
-        label: 'Hello View',
-        onClick: (session: AbstractSessionModel) => {
-          session.addView('HelloView', {})
-        },
-      })
-    }
-  }
+  configure(pluginManager: PluginManager) {}
 }
